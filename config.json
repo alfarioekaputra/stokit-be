@@ -1,0 +1,15 @@
+{
+  "app": {
+    "name": "stokit"
+  },
+  "web": {
+    "prefork": false,
+    "port": 8000
+  },
+  "log": {
+    "level": 6
+  },
+  "database": {
+    "name": "stokit.db"
+  }
+}
