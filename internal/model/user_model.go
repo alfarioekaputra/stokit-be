@@ -3,6 +3,7 @@ package model
 type UserResponse struct {
 	ID        string `json:"id,omitempty"`
 	Username  string `json:"username,omitempty"`
+	Email     string `json:"email,omitempty"`
 	Token     string `json:"token,omitempty"`
 	CreatedAt int64  `json:"created_at,omitempty"`
 	UpdatedAt int64  `json:"updated_at,omitempty"`
@@ -35,4 +36,17 @@ type LogoutUserRequest struct {
 
 type GetUserRequest struct {
 	ID string `json:"id" validate:"required,max=100"`
+}
+
+type SearchUserRequest struct {
+	ID       string `json:"id" validate:"required"`
+	Username string `json:"name" validate:"max=100"`
+	Email    string `json:"email" validate:"max=200"`
+	Page     int    `json:"page" validate:"min=1"`
+	Size     int    `json:"size" validate:"min=1,max=100"`
+}
+
+type UserFilter struct {
+	Email    *string `query:"email"`
+	Username *string `query:"username"`
 }

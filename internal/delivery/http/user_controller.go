@@ -1,6 +1,7 @@
 package http
 
 import (
+	"stokit/external"
 	"stokit/internal/delivery/http/middleware"
 	"stokit/internal/model"
 	"stokit/internal/usecase"
@@ -104,4 +105,27 @@ func (c *UserController) Update(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.JSON(model.WebResponse[*model.UserResponse]{Data: response})
+}
+
+func (c *UserController) FetchAll(ctx *fiber.Ctx) error {
+
+	filter := new(model.UserFilter)
+	if err := ctx.QueryParser(filter); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid filter"})
+	}
+
+	stdReq, err := external.ConvertFiberToHTTPRequest(ctx)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to convert request",
+		})
+	}
+
+	users, err := c.UseCase.FetchAll(stdReq, filter)
+	if err != nil {
+		c.Log.WithError(err).Warnf("Failed to fetch all users")
+		return err
+	}
+
+	return ctx.JSON(users)
 }

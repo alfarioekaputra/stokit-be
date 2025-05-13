@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"stokit/internal/config"
-	"stokit/internal/entity"
 
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
@@ -23,7 +22,6 @@ func main() {
 		Config:   viperConfig,
 	})
 
-	db.AutoMigrate(&entity.User{})
 	webPort := viperConfig.GetInt("web.port")
 
 	app.Use(cors.New(cors.Config{

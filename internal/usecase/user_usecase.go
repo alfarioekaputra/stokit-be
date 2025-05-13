@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"net/http"
 	"stokit/internal/entity"
 	"stokit/internal/model"
 	"stokit/internal/model/converter"
@@ -29,6 +30,33 @@ func NewUserUsecase(db *gorm.DB, logger *logrus.Logger, validate *validator.Vali
 		Validate:       validate,
 		UserRepository: userRepository,
 	}
+}
+func (c *UserUsecase) FetchAll(req *http.Request, filter *model.UserFilter) (*model.PaginatedResponse[*model.UserResponse], error) {
+	raw, err := repository.FetchAllWithFilter[entity.User](
+		c.DB,
+		req,
+		filter,
+		repository.ApplyUserFilter,
+	)
+	if err != nil {
+		c.Log.Warnf("failed fetch user: %+v", err)
+		return nil, fiber.ErrNotFound
+	}
+
+	var users []*model.UserResponse
+	for _, user := range raw.Items {
+		userResponse := converter.UserToResponse(&user)
+		users = append(users, userResponse)
+	}
+
+	return &model.PaginatedResponse[*model.UserResponse]{
+		Items: users,
+		Page:  raw.Page,
+		Size:  raw.Size,
+		Total: raw.Total,
+		First: raw.First,
+		Last:  raw.Last,
+	}, nil
 }
 
 func (c *UserUsecase) Verify(ctx context.Context, request *model.VerifyUserRequest) (*model.Auth, error) {

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"stokit/internal/entity"
+	"stokit/internal/model"
 
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -32,4 +33,14 @@ func (r *UserRepository) CountByEmail(db *gorm.DB, email string) (int64, error) 
 	err := db.Model(new(entity.User)).Where("email = ?", email).Count(&total).Error
 
 	return total, err
+}
+
+func ApplyUserFilter(db *gorm.DB, filter *model.UserFilter) *gorm.DB {
+	if filter.Email != nil {
+		db = db.Where("email = ?", *filter.Email)
+	}
+	if filter.Username != nil {
+		db = db.Where("username LIKE ?", "%"+*filter.Username+"%")
+	}
+	return db
 }

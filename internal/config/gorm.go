@@ -1,6 +1,7 @@
 package config
 
 import (
+	"stokit/internal/entity"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -33,6 +34,8 @@ func NewDatabase(viper *viper.Viper, log *logrus.Logger) *gorm.DB {
 	if err != nil {
 		log.Fatalf("failed to connect database: %v", err)
 	}
+
+	db.AutoMigrate(&entity.User{}, &entity.Category{}, &entity.Product{})
 
 	connection.SetMaxIdleConns(idleConnection)
 	connection.SetMaxOpenConns(maxConnection)

@@ -1,6 +1,9 @@
 package repository
 
-import "gorm.io/gorm"
+import (
+	"github.com/morkid/paginate"
+	"gorm.io/gorm"
+)
 
 type Repository[T any] struct {
 	DB *gorm.DB
@@ -27,4 +30,18 @@ func (r *Repository[T]) CountById(db *gorm.DB, id any) (int64, error) {
 
 func (r *Repository[T]) FindById(db *gorm.DB, entity *T, id any) error {
 	return db.Where("id = ?", id).Take(entity).Error
+}
+
+func (r *Repository[T]) FetchAll(db *gorm.DB, page int64, limit int64) ([]T, int64, error) {
+	var entities []T
+	pg := paginate.New()
+
+	query := db.Model(new(T))
+
+	result := pg.With(query).Request(&paginate.Request{
+		Page: page,
+		Size: limit,
+	}).Response(&entities)
+
+	return entities, result.Total, nil
 }
