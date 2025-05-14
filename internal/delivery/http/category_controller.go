@@ -59,3 +59,21 @@ func (c *CategoryController) Create(ctx *fiber.Ctx) error {
 
 	return ctx.JSON(model.WebResponse[*model.CategoryResponse]{Data: response})
 }
+
+func (c *CategoryController) Update(ctx *fiber.Ctx) error {
+	request := new(model.UpdateCategoryRequest)
+	if err := ctx.BodyParser(request); err != nil {
+		c.Log.Warnf("Failed to parse request body : %+v", err)
+		return fiber.ErrBadRequest
+	}
+
+	request.ID = ctx.Params("categoryId")
+
+	response, err := c.CategoryUsecase.Update(ctx.Context(), request)
+	if err != nil {
+		c.Log.WithError(err).Error("Error Update Category")
+		return err
+	}
+
+	return ctx.JSON(model.WebResponse[*model.CategoryResponse]{Data: response})
+}

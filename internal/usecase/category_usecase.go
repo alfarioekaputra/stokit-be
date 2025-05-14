@@ -87,3 +87,35 @@ func (c *CategoryUsecase) Create(ctx context.Context, request *model.CreateCateg
 
 	return converter.CategoryToResponse(category), nil
 }
+
+func (c *CategoryUsecase) Update(ctx context.Context, request *model.UpdateCategoryRequest) (*model.CategoryResponse, error) {
+	tx := c.DB.WithContext(ctx).Begin()
+	defer tx.Rollback()
+
+	err := c.Validate.Struct(request)
+	if err != nil {
+		c.Log.Warnf("Invalid request body : %+v", err)
+		return nil, fiber.ErrBadRequest
+	}
+
+	category := new(entity.Category)
+	if err := c.CategoryRepository.FindById(tx, category, request.ID); err != nil {
+		c.Log.Warnf("Failed find category by id : %+v", err)
+		return nil, fiber.ErrNotFound
+	}
+
+	category.Name = request.Name
+	category.ParentID = request.ParentID
+
+	if err := c.CategoryRepository.Update(tx, category); err != nil {
+		c.Log.Warnf("Failed save category : %+v", err)
+		return nil, fiber.ErrInternalServerError
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		c.Log.Warnf("Failed commit transaction : %+v", err)
+		return nil, fiber.ErrInternalServerError
+	}
+
+	return converter.CategoryToResponse(category), nil
+}

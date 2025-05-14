@@ -2,6 +2,7 @@ package route
 
 import (
 	"stokit/internal/delivery/http"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -15,45 +16,31 @@ type RouteConfig struct {
 }
 
 func (c *RouteConfig) Setup() {
-	c.SetupGuestRoute()
-	c.SetupAuthRoute()
+	c.SetupStaticRoute()
+	SetupCategoryRoutes(c)
+	SetupUserRoutes(c)
 }
 
-func (c *RouteConfig) SetupGuestRoute() {
-	// c.App.Static("/", "./views/dist", fiber.Static{
-	// 	Compress:  true,
-	// 	ByteRange: true,
-	// 	Browse:    true,
-	// 	Index:     "index.html",
-	// })
-	c.App.Post("/api/users", c.UserController.Register)
-	c.App.Post("/api/users/_login", c.UserController.Login)
+func (c *RouteConfig) SetupStaticRoute() {
+	c.App.Static("/", "./views/dist", fiber.Static{
+		Compress:  true,
+		ByteRange: true,
+		Browse:    true,
+		Index:     "index.html",
+	})
 
-	// c.App.Use(func(ctx *fiber.Ctx) error {
-	// 	path := ctx.Path()
-	// 	method := ctx.Method()
+	c.App.Use(func(ctx *fiber.Ctx) error {
+		path := ctx.Path()
+		method := ctx.Method()
 
-	// 	// Hanya intercept GET request, bukan ke /api atau file statis (.js, .css, .png, dll)
-	// 	if method == fiber.MethodGet &&
-	// 		!strings.HasPrefix(path, "/api") &&
-	// 		!strings.Contains(path, ".") {
-	// 		return ctx.SendFile("./views/dist/index.html")
-	// 	}
+		// Hanya intercept GET request, bukan ke /api atau file statis (.js, .css, .png, dll)
+		if method == fiber.MethodGet &&
+			!strings.HasPrefix(path, "/api") &&
+			!strings.Contains(path, ".") {
+			return ctx.SendFile("./views/dist/index.html")
+		}
 
-	// 	return ctx.Next()
-	// })
-
-}
-
-func (c *RouteConfig) SetupAuthRoute() {
-	api := c.App.Group("/api", c.AuthMiddleware)
-	api.Delete("/users", c.UserController.Logout)
-	api.Patch("/users/_current", c.UserController.Update)
-	api.Get("/users/_current", c.UserController.Current)
-	api.Get("/users", c.UserController.FetchAll)
-
-	//category
-	api.Get("/category", c.CategoryController.List)
-	api.Post("/category", c.CategoryController.Create)
+		return ctx.Next()
+	})
 
 }
