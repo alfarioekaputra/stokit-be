@@ -25,6 +25,10 @@ type CreateCategoryRequest struct {
 	ParentID string `json:"parent_id"`
 }
 
+type ViewCategoryRequest struct {
+	ID string `json:"-" validate:"required"`
+}
+
 type UpdateCategoryRequest struct {
 	ID       string `json:"-" validate:"required"`
 	Name     string `json:"name" validate:"required,max=100"`

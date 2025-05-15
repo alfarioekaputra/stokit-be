@@ -88,6 +88,22 @@ func (c *CategoryUsecase) Create(ctx context.Context, request *model.CreateCateg
 	return converter.CategoryToResponse(category), nil
 }
 
+func (c *CategoryUsecase) View(ctx context.Context, request *model.ViewCategoryRequest) (*model.CategoryResponse, error) {
+	err := c.Validate.Struct(request)
+	if err != nil {
+		c.Log.Warnf("Invalid request bidy : %+v", err)
+		return nil, fiber.ErrBadRequest
+	}
+
+	category := new(entity.Category)
+	if err := c.CategoryRepository.FindById(c.DB, category, request.ID); err != nil {
+		c.Log.Warnf("Category Not Found")
+		return nil, fiber.ErrNotFound
+	}
+
+	return converter.CategoryToResponse(category), nil
+}
+
 func (c *CategoryUsecase) Update(ctx context.Context, request *model.UpdateCategoryRequest) (*model.CategoryResponse, error) {
 	tx := c.DB.WithContext(ctx).Begin()
 	defer tx.Rollback()

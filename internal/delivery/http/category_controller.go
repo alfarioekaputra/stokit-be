@@ -43,6 +43,22 @@ func (c *CategoryController) List(ctx *fiber.Ctx) error {
 	return ctx.JSON(categories)
 }
 
+func (c *CategoryController) View(ctx *fiber.Ctx) error {
+	categoryId := ctx.Params("categoryId")
+
+	request := &model.ViewCategoryRequest{
+		ID: categoryId,
+	}
+
+	response, err := c.CategoryUsecase.View(ctx.Context(), request)
+	if err != nil {
+		c.Log.Warnf("Category not found : %+v", err)
+		return err
+	}
+
+	return ctx.JSON(model.WebResponse[*model.CategoryResponse]{Data: response})
+}
+
 func (c *CategoryController) Create(ctx *fiber.Ctx) error {
 	request := new(model.CreateCategoryRequest)
 	err := ctx.BodyParser(request)
