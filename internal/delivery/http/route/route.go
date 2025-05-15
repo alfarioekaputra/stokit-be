@@ -16,9 +16,16 @@ type RouteConfig struct {
 }
 
 func (c *RouteConfig) Setup() {
+	c.SetupGuestRoute()
 	c.SetupStaticRoute()
 	SetupCategoryRoutes(c)
 	SetupUserRoutes(c)
+}
+
+func (c *RouteConfig) SetupGuestRoute() {
+	//Guest
+	c.App.Post("/api/users", c.UserController.Register)
+	c.App.Post("/api/users/_login", c.UserController.Login)
 }
 
 func (c *RouteConfig) SetupStaticRoute() {

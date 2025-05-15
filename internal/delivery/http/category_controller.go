@@ -62,7 +62,7 @@ func (c *CategoryController) Create(ctx *fiber.Ctx) error {
 
 func (c *CategoryController) Update(ctx *fiber.Ctx) error {
 	request := new(model.UpdateCategoryRequest)
-	if err := ctx.BodyParser(request); err != nil {
+	if err := ctx.BodyParser(&request); err != nil {
 		c.Log.Warnf("Failed to parse request body : %+v", err)
 		return fiber.ErrBadRequest
 	}
