@@ -9,6 +9,6 @@ func CategoryToResponse(category *entity.Category) *model.CategoryResponse {
 	return &model.CategoryResponse{
 		ID:       category.ID,
 		Name:     category.Name,
-		ParentID: category.ParentID,
+		ParentID: *category.ParentID,
 	}
 }

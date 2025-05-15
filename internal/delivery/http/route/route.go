@@ -26,6 +26,9 @@ func (c *RouteConfig) SetupGuestRoute() {
 	//Guest
 	c.App.Post("/api/users", c.UserController.Register)
 	c.App.Post("/api/users/_login", c.UserController.Login)
+
+	//GetCagtegoryTree
+	c.App.Get("/api/category/tree", c.CategoryController.GetTree)
 }
 
 func (c *RouteConfig) SetupStaticRoute() {

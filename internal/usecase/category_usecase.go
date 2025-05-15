@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"stokit/internal/entity"
 	"stokit/internal/model"
@@ -72,7 +73,7 @@ func (c *CategoryUsecase) Create(ctx context.Context, request *model.CreateCateg
 	category := &entity.Category{
 		ID:       uuid.New().String(),
 		Name:     request.Name,
-		ParentID: request.ParentID,
+		ParentID: &request.ParentID,
 	}
 
 	if err := c.CategoryRepository.Create(tx, category); err != nil {
@@ -121,7 +122,7 @@ func (c *CategoryUsecase) Update(ctx context.Context, request *model.UpdateCateg
 	}
 
 	category.Name = request.Name
-	category.ParentID = request.ParentID
+	category.ParentID = &request.ParentID
 
 	if err := c.CategoryRepository.Update(tx, category); err != nil {
 		c.Log.Warnf("Failed save category : %+v", err)
@@ -165,4 +166,41 @@ func (c *CategoryUsecase) Delete(ctx context.Context, request *model.DeleteCateg
 	}
 
 	return nil
+}
+
+func (c *CategoryUsecase) GetTree(ctx context.Context) ([]*entity.Category, error) {
+	categories, err := c.CategoryRepository.GetTree(c.DB)
+	if err != nil {
+		c.Log.Warnf("cant get tree :+%v", err)
+		return nil, err
+	}
+
+	return buildTree(categories), nil
+}
+
+func buildTree(categories []*entity.Category) []*entity.Category {
+	categoryMap := make(map[string]*entity.Category)
+	var roots []*entity.Category
+
+	for _, cat := range categories {
+		cat.Children = []*entity.Category{}
+		categoryMap[cat.ID] = cat
+	}
+
+	for _, cat := range categories {
+		if cat.ParentID != nil {
+			if parent, ok := categoryMap[*cat.ParentID]; ok {
+				parent.Children = append(parent.Children, cat)
+			} else {
+				// jika parent tidak ditemukan di map
+				log.Printf("Peringatan: Parent ID %s tidak ditemukan", *cat.ParentID)
+				// kamu bisa pilih untuk skip atau jadikan root
+				roots = append(roots, cat) // atau abaikan
+			}
+		} else {
+			roots = append(roots, cat)
+		}
+	}
+
+	return roots
 }

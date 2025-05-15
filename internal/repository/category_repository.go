@@ -19,6 +19,14 @@ func NewCategoryRepository(log *logrus.Logger) *CategoryRepository {
 	}
 }
 
+func (r *CategoryRepository) GetTree(db *gorm.DB) ([]*entity.Category, error) {
+	var categories []*entity.Category
+	err := db.Find(&categories).Error
+
+	return categories, err
+
+}
+
 func ApplyCategoryFilter(db *gorm.DB, filter *model.CategoryFilter) *gorm.DB {
 	if filter.Name != nil {
 		db = db.Where("email = ?", *filter.Name)

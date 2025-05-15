@@ -108,3 +108,12 @@ func (c *CategoryController) Delete(ctx *fiber.Ctx) error {
 
 	return ctx.JSON(model.WebResponse[bool]{Data: true})
 }
+
+func (c *CategoryController) GetTree(ctx *fiber.Ctx) error {
+	tree, err := c.CategoryUsecase.GetTree(ctx.Context())
+	if err != nil {
+		return fiber.ErrInternalServerError
+	}
+
+	return ctx.JSON(tree)
+}
