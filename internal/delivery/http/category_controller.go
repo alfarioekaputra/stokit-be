@@ -77,3 +77,18 @@ func (c *CategoryController) Update(ctx *fiber.Ctx) error {
 
 	return ctx.JSON(model.WebResponse[*model.CategoryResponse]{Data: response})
 }
+
+func (c *CategoryController) Delete(ctx *fiber.Ctx) error {
+	categoryId := ctx.Params("categoryId")
+
+	request := &model.DeleteCategoryRequest{
+		ID: categoryId,
+	}
+
+	if err := c.CategoryUsecase.Delete(ctx.Context(), request); err != nil {
+		c.Log.WithError(err).Error("Error Deleting Category")
+		return err
+	}
+
+	return ctx.JSON(model.WebResponse[bool]{Data: true})
+}

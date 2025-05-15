@@ -30,3 +30,7 @@ type UpdateCategoryRequest struct {
 	Name     string `json:"name" validate:"required,max=100"`
 	ParentID string `json:"parent_id"`
 }
+
+type DeleteCategoryRequest struct {
+	ID string `json:"-" validate:"required"`
+}

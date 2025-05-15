@@ -119,3 +119,34 @@ func (c *CategoryUsecase) Update(ctx context.Context, request *model.UpdateCateg
 
 	return converter.CategoryToResponse(category), nil
 }
+
+func (c *CategoryUsecase) Delete(ctx context.Context, request *model.DeleteCategoryRequest) error {
+	tx := c.DB.WithContext(ctx).Begin()
+	defer tx.Rollback()
+
+	err := c.Validate.Struct(request)
+	if err != nil {
+		c.Log.Warnf("Invalid request body : %+v", err)
+		return fiber.ErrBadRequest
+	}
+
+	category := new(entity.Category)
+	if err := c.CategoryRepository.FindById(tx, category, request.ID); err != nil {
+		c.Log.Warnf("Failed find category by id : %+v", err)
+		return fiber.ErrNotFound
+	}
+
+	category.ID = request.ID
+
+	if err := c.CategoryRepository.Delete(tx, category); err != nil {
+		c.Log.Warnf("Failed delete category : %+v", err)
+		return fiber.ErrInternalServerError
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		c.Log.Warnf("Failed commit transaction : %+v", err)
+		return fiber.ErrInternalServerError
+	}
+
+	return nil
+}
