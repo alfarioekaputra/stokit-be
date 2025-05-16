@@ -29,10 +29,7 @@ func (r *CategoryRepository) GetTree(db *gorm.DB) ([]*entity.Category, error) {
 
 func ApplyCategoryFilter(db *gorm.DB, filter *model.CategoryFilter) *gorm.DB {
 	if filter.Name != nil {
-		db = db.Where("email = ?", *filter.Name)
-	}
-	if filter.ParentID != nil {
-		db = db.Where("username = ?", *filter.ParentID)
+		db = db.Where("name LIKE ?", "%"+*filter.Name+"%")
 	}
 	return db
 }
