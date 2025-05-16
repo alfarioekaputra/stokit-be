@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"net/http"
+	"stokit/external/helper"
 	"stokit/internal/entity"
 	"stokit/internal/model"
 	"stokit/internal/model/converter"
@@ -37,6 +38,7 @@ func (c *UserUsecase) FetchAll(req *http.Request, filter *model.UserFilter) (*mo
 		req,
 		filter,
 		repository.ApplyUserFilter,
+		helper.Preloads("Parent"),
 	)
 	if err != nil {
 		c.Log.Warnf("failed fetch user: %+v", err)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"stokit/external/helper"
 	"stokit/internal/entity"
 	"stokit/internal/model"
 	"stokit/internal/model/converter"
@@ -38,6 +39,7 @@ func (c *CategoryUsecase) List(req *http.Request, filter *model.CategoryFilter) 
 		req,
 		filter,
 		repository.ApplyCategoryFilter,
+		helper.Preloads("Parent"),
 	)
 	if err != nil {
 		c.Log.Warnf("failed fetch user: %+v", err)

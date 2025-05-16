@@ -1,7 +1,7 @@
 package http
 
 import (
-	"stokit/external"
+	"stokit/external/helper"
 	"stokit/internal/delivery/http/middleware"
 	"stokit/internal/model"
 	"stokit/internal/usecase"
@@ -114,7 +114,7 @@ func (c *UserController) FetchAll(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid filter"})
 	}
 
-	stdReq, err := external.ConvertFiberToHTTPRequest(ctx)
+	stdReq, err := helper.ConvertFiberToHTTPRequest(ctx)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to convert request",

@@ -4,6 +4,7 @@ type CategoryResponse struct {
 	ID        string `json:"id,omitempty"`
 	Name      string `json:"name,omitempty"`
 	ParentID  string `json:"parent_id"`
+	Parent    string `json:"parent"`
 	CreatedAt int64  `json:"created_at,omitempty"`
 	UpdatedAt int64  `json:"updated_at,omitempty"`
 }
