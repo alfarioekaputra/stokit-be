@@ -7,6 +7,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/spf13/viper"
 )
 
 func ExtractUnverifiedClaims(tokenString string, c *fiber.Ctx) (err error) {
@@ -65,7 +66,7 @@ func GenerateTokenPair(user_id string, username string) (map[string]string, erro
 
 	// Generate encoded token and send it as response.
 	// The signing string should be secret (a generated UUID works too)
-	t, err := token.SignedString([]byte("rahasia"))
+	t, err := token.SignedString([]byte(viper.GetString("auth.jwtKey")))
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +76,7 @@ func GenerateTokenPair(user_id string, username string) (map[string]string, erro
 	rtClaims["sub"] = 1
 	rtClaims["exp"] = time.Now().Add(time.Hour * 24).Unix()
 
-	rt, err := refreshToken.SignedString([]byte("rahasia"))
+	rt, err := refreshToken.SignedString([]byte(viper.GetString("auth.jwtKey")))
 	if err != nil {
 		return nil, err
 	}

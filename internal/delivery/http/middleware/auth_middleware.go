@@ -8,6 +8,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/spf13/viper"
 )
 
 func NewAuth(userUserCase *usecase.UserUsecase) fiber.Handler {
@@ -51,7 +52,7 @@ func VerifyToken(ctx *fiber.Ctx) error {
 		if _, ok := jwtToken.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %s", jwtToken.Header["alg"])
 		}
-		return []byte("rahasia"), nil
+		return []byte(viper.GetString("auth.jwtKey")), nil
 	})
 
 	if err != nil {
