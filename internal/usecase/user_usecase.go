@@ -8,6 +8,7 @@ import (
 	"stokit/internal/model"
 	"stokit/internal/model/converter"
 	"stokit/internal/repository"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -132,38 +133,50 @@ func (c *UserUsecase) Create(ctx context.Context, request *model.RegisterUserReq
 	return converter.UserToResponse(user), nil
 }
 
-func (c *UserUsecase) Login(ctx context.Context, request *model.LoginUserRequest) (*model.UserResponse, error) {
-	tx := c.DB.WithContext(ctx).Begin()
-	defer tx.Rollback()
+func (c *UserUsecase) Login(ctx *fiber.Ctx, request *model.LoginUserRequest) (token model.Token, err error) {
 
 	if err := c.Validate.Struct(request); err != nil {
 		c.Log.Warnf("Invalid request body  : %+v", err)
-		return nil, fiber.ErrBadRequest
+		return token, fiber.ErrBadRequest
 	}
 
 	user := new(entity.User)
-	if err := c.UserRepository.FindByEmail(tx, user, request.Email); err != nil {
+	if err := c.UserRepository.FindByEmail(c.DB, user, request.Email); err != nil {
 		c.Log.Warnf("Failed find user by email : %+v", err)
-		return nil, fiber.ErrUnauthorized
+		return token, fiber.ErrUnauthorized
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password)); err != nil {
 		c.Log.Warnf("Failed to compare user password with bcrype hash : %+v", err)
-		return nil, fiber.ErrUnauthorized
+		return token, fiber.ErrUnauthorized
 	}
 
-	user.Token = uuid.New().String()
-	if err := c.UserRepository.Update(tx, user); err != nil {
-		c.Log.Warnf("Failed save user : %+v", err)
-		return nil, fiber.ErrInternalServerError
+	tokenPair, err := helper.GenerateTokenPair(user.ID, user.Username)
+	if err != nil {
+		return token, err
 	}
 
-	if err := tx.Commit().Error; err != nil {
-		c.Log.Warnf("Failed commit transaction : %+v", err)
-		return nil, fiber.ErrInternalServerError
-	}
+	token.Token = tokenPair["access_token"]
+	token.RefreshToken = tokenPair["refresh_token"]
 
-	return converter.UserToTokenResponse(user), nil
+	cookie := fiber.Cookie{
+		Name:     "jwt",
+		Value:    token.Token,
+		Expires:  time.Now().Add(time.Hour * 1),
+		HTTPOnly: true,
+	} //Creates the cookie to be passed.
+
+	ctx.Cookie(&cookie)
+
+	return token, err
+
+	// user.Token = uuid.New().String()
+	// if err := c.UserRepository.Update(tx, user); err != nil {
+	// 	c.Log.Warnf("Failed save user : %+v", err)
+	// 	return nil, fiber.ErrInternalServerError
+	// }
+
+	// return converter.UserToTokenResponse(user), nil
 }
 
 func (c *UserUsecase) Current(ctx context.Context, request *model.GetUserRequest) (*model.UserResponse, error) {

@@ -47,13 +47,13 @@ func (c *UserController) Login(ctx *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	response, err := c.UseCase.Login(ctx.UserContext(), request)
+	response, err := c.UseCase.Login(ctx, request)
 	if err != nil {
 		c.Log.Warnf("Failed to login user : %+v", err)
 		return err
 	}
 
-	return ctx.JSON(model.WebResponse[*model.UserResponse]{Data: response})
+	return ctx.JSON(model.WebResponse[model.Token]{Data: response})
 }
 
 func (c *UserController) Current(ctx *fiber.Ctx) error {

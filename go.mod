@@ -14,6 +14,7 @@ require (
 	github.com/gofiber/fiber/v2 v2.52.6 // indirect
 	github.com/gofiber/jwt/v2 v2.2.7 // indirect
 	github.com/golang-jwt/jwt/v4 v4.0.0 // indirect
+	github.com/golang-jwt/jwt/v5 v5.2.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/iancoleman/strcase v0.1.3 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect

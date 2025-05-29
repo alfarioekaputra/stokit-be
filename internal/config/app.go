@@ -39,7 +39,8 @@ func Bootstrap(config *BootstrapConfig) {
 	categoryController := http.NewCategoryController(categoryUseCase, config.Log)
 
 	// setup middleware
-	authMiddleware := middleware.NewAuth(userUseCase)
+	// authMiddleware := middleware.NewAuth(userUseCase)
+	authMiddleware := middleware.VerifyToken
 
 	routeConfig := route.RouteConfig{
 		App:                config.App,
