@@ -35,7 +35,7 @@ func NewDatabase(viper *viper.Viper, log *logrus.Logger) *gorm.DB {
 		log.Fatalf("failed to connect database: %v", err)
 	}
 
-	db.AutoMigrate(&entity.User{}, &entity.Category{}, &entity.Product{})
+	db.AutoMigrate(&entity.User{}, &entity.Category{}, &entity.Product{}, &entity.Supplier{})
 
 	connection.SetMaxIdleConns(idleConnection)
 	connection.SetMaxOpenConns(maxConnection)

@@ -12,6 +12,7 @@ type RouteConfig struct {
 	UserController     *http.UserController
 	ProductController  *http.ProductController
 	CategoryController *http.CategoryController
+	SupplierController *http.SupplierController
 	AuthMiddleware     fiber.Handler
 }
 
@@ -19,6 +20,7 @@ func (c *RouteConfig) Setup() {
 	c.SetupGuestRoute()
 	c.SetupStaticRoute()
 	SetupCategoryRoutes(c)
+	SetupSupplierRoutes(c)
 	SetupUserRoutes(c)
 }
 
