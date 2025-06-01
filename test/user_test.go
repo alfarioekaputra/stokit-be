@@ -14,6 +14,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+var testToken string
+
 func TestRegister(t *testing.T) {
 	ClearAll()
 	requestBody := model.RegisterUserRequest{
@@ -134,10 +136,7 @@ func TestLogin(t *testing.T) {
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 	assert.NotNil(t, responseBody.Data.Token)
 
-	user := new(entity.User)
-	err = db.Where("email = ?", requestBody.Email).First(user).Error
-	assert.Nil(t, err)
-	assert.Equal(t, user.Token, responseBody.Data.Token)
+	testToken = responseBody.Data.Token
 }
 
 func TestLoginWrongEmail(t *testing.T) {
@@ -204,14 +203,10 @@ func TestLogout(t *testing.T) {
 	ClearAll()
 	TestLogin(t) // login success
 
-	user := new(entity.User)
-	err := db.Where("email = ?", "admin@mail.com").First(user).Error
-	assert.Nil(t, err)
-
 	request := httptest.NewRequest(http.MethodDelete, "/api/users", nil)
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Accept", "application/json")
-	request.Header.Set("Authorization", user.Token)
+	request.Header.Set("Authorization", "Bearer "+testToken)
 
 	response, err := app.Test(request)
 	assert.Nil(t, err)
@@ -261,7 +256,7 @@ func TestGetCurrentUser(t *testing.T) {
 	request := httptest.NewRequest(http.MethodGet, "/api/users/_current", nil)
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Accept", "application/json")
-	request.Header.Set("Authorization", user.Token)
+	request.Header.Set("Authorization", "Bearer "+testToken)
 
 	response, err := app.Test(request)
 	assert.Nil(t, err)
@@ -321,7 +316,7 @@ func TestUpdateUserName(t *testing.T) {
 	request := httptest.NewRequest(http.MethodPatch, "/api/users/_current", strings.NewReader(string(bodyJson)))
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Accept", "application/json")
-	request.Header.Set("Authorization", user.Token)
+	request.Header.Set("Authorization", "Bearer "+testToken)
 
 	response, err := app.Test(request)
 	assert.Nil(t, err)
@@ -358,7 +353,7 @@ func TestUpdateUserPassword(t *testing.T) {
 	request := httptest.NewRequest(http.MethodPatch, "/api/users/_current", strings.NewReader(string(bodyJson)))
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Accept", "application/json")
-	request.Header.Set("Authorization", user.Token)
+	request.Header.Set("Authorization", "Bearer "+testToken)
 
 	response, err := app.Test(request)
 	assert.Nil(t, err)
